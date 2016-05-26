@@ -2,15 +2,115 @@
 layout: post
 title:  "fsh - A functional programming shell"
 date:   2016-05-05 13:12:03 +0200
-categories: os
+categories: os linux zsh
 ---
 
-GNU core-utils and shell built-in commands are key stones when working with Linux.
+GNU core-utils combined with the shell built-in commands are key stones when working with Linux or any other UX OS.
+
+The *pipe* that transfers byte streams from the `stdout` of one command to the `stdin` file descriptor of another command is an extremely powerful mechanism.
+The main idea is to combine many simple tools to solve a given task.
+A single command has a concise syntax and reads nicely.
+
+```bash
+cat my.txt | grep -i "student" | wc -l
+```
+
+It is a great toolbox, hands down.
+
+So most of the time everyting is great by just using the `zsh`.
+In case a certain command line is needed frequently an `alias` can take care of it.
+If some automation would help then a short shell script will do.
+And of course there are the extra goodies which *oh-my-zsh* provides.
+
+Once done with the command-line work a switch to one of the *REPL* tools is probably common.
+For example for Python a nice *REPL* is `ipython` (or `jupyter`).
+
+After a bit of work on some *data wrangling* the similarities between the previous and the current tool are noticeable.
+The work is interactive and often different tools are combined in several steps of iteration until a satisfactory result is found.
+The processing model in both cases can be shortly described as "applying functions on a byte stream".
+There is a lot of over-simplification in the above statements.
+Still it looks like fun to keep digging.
+
+
+Probably a quick categorization of the GNU core-utils can help.
+But wait, how many core-utils are there?
+
+To answer that one the core-utils can be *cloned* from the git repo.
+Then use some core-utils to do the counting.
+
+```bash
+# this one works but comes with an ugly output from stderr
+ls -1 *.c | cut -f 1 -d '.' | xargs man -f -s 1 | grep -v 'nothing appropriate' | wc -l
+```
+
+```bash
+$ ls -1 *.c | cut -f 1 -d '.' | xargs man -f -s 1 2>/dev/null | wc -l               
+
+96
+```
+
+Altogether 96 core-utils.
+
+Next step is to dump the name with its short description into a file.
+Just by the quick description `cut` seems like the perfect tool.
+`cut` is pretty much the *project* operation in Relational Algebra or the *select* clause in SQL.
+
+The output of `man -f` is not great.
+The words in the short description use the same delimiter (space) which is used to separate some of the columns.
+Actually space and '-' are used as delimiters.
+Most core-utils use a human-friendly output format.
+
+```bash
+$ ls -1 *.c | cut -f 1 -d '.' | xargs man -f -s 1 2>/dev/null
+
+base64 (1) - base64 encode/decode data and print to standard output
+basename (1) - strip directory and suffix from filenames
+...             
+```
+
+That's not a roadblock.
+Luckily the description is in the "last column".
+
+```bash
+$ ls -1 *.c | cut -f 1 -d '.' | xargs man -f -s 1 2>/dev/null | tr -s ' ' | cut -d ' ' -f 1,3,4-
+
+base64 - base64 encode/decode data and print to standard output
+basename - strip directory and suffix from filenames
+...
+```
+
+That's more like the output for the data-wranglers among the command-line users.
+
+Now back to the categorization of the core-utils.
+In the output file 3 columns got manually added.
+
+* pure or side-effect
+* type of data processing
+* type of node in processing pipeline
+
+The definitions of the data processing types are as follows:
+
+* filter - less rows as result
+* sort - same rows in different order
+* transform - same rows with different content
+* reduce - input rows get discarded; new and less rows as result
+* map - must be called with `xargs`
+* generate - it is a source
+* destroy - it is a sink
+
+The definitions of the node types:
+
+* source - does not read input (no *|* to the left)
+* sink - does not write output (no *|* to the right)
+* step - reads input and writes output
+
 
 * output of commands is space-, tab- or comma-separated format
 * filters, aggregates are nicely done with lambda functions and functional programming
 * the __|__ of the shell is the __.__ of a functional language
 * _sort_ by various columns of core-utils is done with many options
+* `awk` is the anonymous function or lambda
+* `xargs` is the map function
 
 ```bash
 du -sh . | sort
@@ -18,6 +118,14 @@ du -sh . | sort
 
 ```scala
 du(".").sum().filter(humanReadable).sort()
+```
+
+```bash
+cat -n 2 my.txt | wc
+```
+
+```python
+cat("my.txt").n(2).end().pipe().wc.end()
 ```
 
 [es-shell]: (https://stuff.mit.edu/afs/sipb/user/yandros/doc/es-usenix-winter93.html)
