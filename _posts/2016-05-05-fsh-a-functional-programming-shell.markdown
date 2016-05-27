@@ -1,36 +1,57 @@
 ---
 layout: post
-title:  "fsh - A functional programming shell"
-date:   2016-05-05 13:12:03 +0200
+title:  "A Data Wrangler's view on the GNU core-utils"
+date:   2016-05-27 13:12:03 +0200
 categories: os linux zsh
 ---
 
-GNU core-utils combined with the shell built-in commands are key stones when working with Linux or any other UX OS.
 
-The *pipe* that transfers byte streams from the `stdout` of one command to the `stdin` file descriptor of another command is an extremely powerful mechanism.
+### Data Wrangler's view
+
+GNU core-utils combined with the shell built-ins are the bread and butter when working interactively with Linux. 
+
+The *pipe* that sends byte streams from the `stdout` of one command to `stdin` of another command is a powerful mechanism.
 The main idea is to combine many simple tools to solve a given task.
-A single command has a concise syntax and reads nicely.
+
+A single command-line has a concise syntax and reads nicely.
 
 ```bash
 cat my.txt | grep -i "student" | wc -l
 ```
 
 It is a great toolbox, hands down.
-
-So most of the time everyting is great by just using the `zsh`.
-In case a certain command line is needed frequently an `alias` can take care of it.
+In case a certain command-line is needed frequently an `alias` can take care of it.
 If some automation would help then a short shell script will do.
-And of course there are the extra goodies which *oh-my-zsh* provides.
+And of course there are the nice extras which *oh-my-zsh* provides.
 
-Once done with the command-line work a switch to one of the *REPL* tools is probably common.
-For example for Python a nice *REPL* is `ipython` (or `jupyter`).
+Switching frequently between command-line work and one of the *REPL* tools is daily routine for a Data Wrangler.
+For the Data Wranglers using Python `ipython` (`jupyter`) is a nice *REPL* (the use of the term *REPL* is a bit casual here).
 
-After a bit of work on some *data wrangling* the similarities between the previous and the current tool are noticeable.
-The work is interactive and often different tools are combined in several steps of iteration until a satisfactory result is found.
-The processing model in both cases can be shortly described as "applying functions on a byte stream".
-There is a lot of over-simplification in the above statements.
-Still it looks like fun to keep digging.
+```python
+In [1]: len(filter(lambda x: True if x.find("student") > 0 else False, open("my.txt").readlines()))
 
+Out[1]: 17
+```
+
+The similarities between the previous (`zsh` and core-utils) and the current tool (`jupyter`) are obvious.
+* The work is interactive and often different tools are combined in several iterations until a satisfactory result is found.
+* The processing model in both cases can be shortly described as "applying multiple functions consecutively on (a stream of) data".
+
+```bash
+function_f | function_g
+
+# can be written as
+f() | g()
+
+# mathematical as
+f(g())
+
+# functional as
+f().g()
+```
+
+
+### Categorizing the core-utils
 
 Probably a quick categorization of the GNU core-utils can help.
 But wait, how many core-utils are there?
@@ -104,6 +125,8 @@ The definitions of the node types:
 * sink - does not write output (no *|* to the right)
 * step - reads input and writes output
 
+
+### 
 
 * output of commands is space-, tab- or comma-separated format
 * filters, aggregates are nicely done with lambda functions and functional programming
