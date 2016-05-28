@@ -1,0 +1,96 @@
+base64 - base64 encode/decode data and print to standard output - reduce - pure - step
+basename - strip directory and suffix from filenames - map - pure - step
+cat - concatenate files and print on the standard output - copy - side_effect - source
+chcon - change file security context - map - side_effect - sink
+chgrp - change group ownership - map - side_effect - sink
+chmod - change file mode bits - map - side_effect - sink
+chown - change file owner and group - map - side_effect - sink
+cksum - checksum and count the bytes in a file - reduce - pure - step
+comm - compare two sorted files line by line - destroy - side_effect - source
+cp - copy files and directories - map - side_effect - sink
+csplit - split a file into sections determined by context lines - copy - side_effect - sink
+cut - remove sections from each line of files - transform - pure - step
+date - print or set the system date and time - destroy - side_effect - source
+dd - convert and copy a file - transform - pure - step
+df - report file system disk space usage - destroy - side_effect - source
+dircolors - color setup for ls - destroy - side_effect - source
+dirname - strip last component from file name - map - pure - step
+du - estimate file space usage - destroy - side_effect - source
+echo - display a line of text - destroy - pure - source
+env - run a program in a modified environment
+expand - convert tabs to spaces - transform - pure - step
+expr - evaluate expressions
+factor - factor numbers
+false - do nothing, unsuccessfully - destroy - pure - sink
+fmt - simple optimal text formatter - transform - pure - step
+fold - wrap each input line to fit in specified width - transform - pure - step
+groups - print the groups a user is in - map - side_effect - step
+HEAD - Simple command line user agent
+head - output the first part of files - filter - pure - step
+hostid - print the numeric identifier for the current host - destroy - side_effect - source
+hostname - show or set the system's host name - destroy - side_effect - source
+id - print real and effective user and group IDs - destroy - side_effect - source
+install - copy files and set attributes - map - side_effect - sink
+join - join lines of two files on a common field
+kill - send a signal to a process - map - side_effect - sink
+link - call the link function to create a link to a file - map - side_effect - sink
+ln - make links between files - map - side_effect - sink
+logname - print user's login name - destroy - side_effect - source
+ls - list directory contents - destroy - side_effect - source
+md5sum - compute and check MD5 message digest - reduce - pure - sink
+mkdir - make directories - map - side_effect - sink
+mkfifo - make FIFOs (named pipes) - map - side_effect - sink
+mknod - make block or character special files - map - side_effect - sink
+mktemp - create a temporary file or directory - map - side_effect - sink
+mv - move (rename) files - map - side_effect - sink
+nice - run a program with modified scheduling priority
+nl - number lines of files
+nohup - run a command immune to hangups, with output to a non-tty
+nproc - print the number of processing units available - destroy
+numfmt - Convert numbers from/to human-readable strings - format
+od - dump files in octal and other formats - destroy - pure - step
+paste - merge lines of files
+pathchk - check whether file names are valid or portable
+pinky - lightweight finger
+pr - convert text files for printing - format
+printenv - print all or part of environment - destroy
+printf - format and print data - format
+ptx - produce a permuted index of file contents
+pwd - print name of current/working directory - destroy - side_effect - source
+readlink - print resolved symbolic links or canonical file names
+realpath - print the resolved path
+rm - remove files or directories - map - side_effect - sink
+rmdir - remove empty directories - map - side_effect - sink
+runcon - run command with specified security context
+seq - print a sequence of numbers - destroy
+shred - overwrite a file to hide its contents, and optionally delete it - map - side_effect - sink
+shuf - destroy random permutations - generate
+sleep - delay for a specified amount of time
+sort - sort lines of text files - sort - pure - step
+split - split a file into pieces
+stat - display file or file system status
+stdbuf - Run COMMAND, with modified buffering operations for its standard streams.
+stty - change and print terminal line settings
+sum - checksum and count the blocks in a file - reduce - side_effect - step
+sync - Synchronize cached writes to persistent storage
+tac - concatenate and print files in reverse - destroy
+tail - output the last part of files - filter - pure - step
+tee - read from standard input and write to standard output and files
+test - check file types and compare values
+timeout - run a command with a time limit
+touch - change file timestamps - map
+tr - translate or delete characters - transform
+true - do nothing, successfully - constant - pure - sink
+truncate - shrink or extend the size of a file to the specified size
+tsort - perform topological sort - sort - pure - step
+tty - print the file name of the terminal connected to standard input
+uname - print system information - destroy - side_effect - source
+unexpand - convert spaces to tabs - transform - pure - step
+uniq - report or omit repeated lines - reduce - pure - step
+unlink - call the unlink function to remove the specified file
+uptime - Tell how long the system has been running. - destroy - side_effect - source
+users - print the user names of users currently logged in to the current host - destroy - side_effect - source
+wc - print newline, word, and byte counts for each file - reduce - pure - step
+whoami - print effective userid - destroy - side_effect - source
+who - show who is logged on - destroy - side_effect - source
+yes - output a string repeatedly until killed

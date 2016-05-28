@@ -113,13 +113,13 @@ In the output file 3 columns got manually added.
 
 The definitions of the data processing types are as follows:
 
-* filter - less rows as result
-* sort - same rows in different order
-* transform - same rows with different content
-* reduce - input rows get discarded; new and less rows as result
+* filter - input rows but less of them
+* sort - input rows in different order
+* transform - input rows with different content
+* reduce - input rows get aggregated; new and less rows as result
 * map - must be called with `xargs`
-* generate - it is a source
-* destroy - it is a sink
+* destroy - input rows get discarded; new rows as result
+* copy - input rows as result
 
 The definitions of the node types:
 
@@ -127,7 +127,7 @@ The definitions of the node types:
 * sink - does not write output (no __\|__ to the right)
 * step - reads input and writes output
 
-The complete result is wrapped up in this file.
+The complete result of the categorization is wrapped up in this [file]({{ site.github.url }}/files/core-utils.txt).
 
 
 ### Learned so far
@@ -138,6 +138,10 @@ The complete result is wrapped up in this file.
 * _sort_ by various columns of core-utils is done with many options
 * `awk` is the anonymous function or lambda
 * `xargs` is the map function
+
+* The __\|__ cannot fork and join. Processing is always sequential.
+Any parallel processing is hand-coded using for example `split`, `join`.
+* Many commands create no output (no news are good news).
 
 
 ### Future Work
