@@ -17,15 +17,15 @@ dircolors - color setup for ls - destroy - side_effect - source
 dirname - strip last component from file name - map - pure - step
 du - estimate file space usage - destroy - side_effect - source
 echo - display a line of text - destroy - pure - source
-env - run a program in a modified environment
+env - run a program in a modified environment - wrap - undefined - undefined
 expand - convert tabs to spaces - transform - pure - step
-expr - evaluate expressions
-factor - factor numbers
+expr - evaluate expressions - map - pure - step
+factor - factor numbers - transform - pure - step
 false - do nothing, unsuccessfully - destroy - pure - sink
 fmt - simple optimal text formatter - transform - pure - step
 fold - wrap each input line to fit in specified width - transform - pure - step
 groups - print the groups a user is in - map - side_effect - step
-HEAD - Simple command line user agent
+HEAD - Simple command line user agent - expand - side_effect - step
 head - output the first part of files - filter - pure - step
 hostid - print the numeric identifier for the current host - destroy - side_effect - source
 hostname - show or set the system's host name - destroy - side_effect - source
@@ -43,7 +43,7 @@ mkfifo - make FIFOs (named pipes) - map - side_effect - sink
 mknod - make block or character special files - map - side_effect - sink
 mktemp - create a temporary file or directory - map - side_effect - sink
 mv - move (rename) files - map - side_effect - sink
-nice - run a program with modified scheduling priority
+nice - run a program with modified scheduling priority - wrap - undefined - undefined
 nl - number lines of files
 nohup - run a command immune to hangups, with output to a non-tty
 nproc - print the number of processing units available - destroy
@@ -61,13 +61,13 @@ readlink - print resolved symbolic links or canonical file names
 realpath - print the resolved path
 rm - remove files or directories - map - side_effect - sink
 rmdir - remove empty directories - map - side_effect - sink
-runcon - run command with specified security context
+runcon - run command with specified security context - wrap - undefined - undefined
 seq - print a sequence of numbers - destroy
 shred - overwrite a file to hide its contents, and optionally delete it - map - side_effect - sink
 shuf - destroy random permutations - generate
 sleep - delay for a specified amount of time
 sort - sort lines of text files - sort - pure - step
-split - split a file into pieces
+split - split a file into pieces - copy - pure - sink
 stat - display file or file system status
 stdbuf - Run COMMAND, with modified buffering operations for its standard streams.
 stty - change and print terminal line settings
@@ -80,7 +80,7 @@ test - check file types and compare values
 timeout - run a command with a time limit
 touch - change file timestamps - map
 tr - translate or delete characters - transform
-true - do nothing, successfully - constant - pure - sink
+true - do nothing, successfully - destroy - pure - sink
 truncate - shrink or extend the size of a file to the specified size
 tsort - perform topological sort - sort - pure - step
 tty - print the file name of the terminal connected to standard input

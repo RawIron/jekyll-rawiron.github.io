@@ -105,7 +105,7 @@ That's more like the output for the data-wranglers among the command-line users.
 
 #### Categorize manually
 Now back to the categorization of the core-utils.
-In the output file 3 columns got manually added.
+In the output file three new columns got manually added.
 
 * pure or side-effect
 * type of data processing
@@ -114,12 +114,18 @@ In the output file 3 columns got manually added.
 The definitions of the data processing types are as follows:
 
 * filter - input rows but less of them
-* sort - input rows in different order
-* transform - input rows with different content
+* sort - input rows in sorted order
+* transform - input rows with modified content
 * reduce - input rows get aggregated; new and less rows as result
+* expand - input rows get discarded; new and more rows as result
+* destroy - input rows get discarded; new and less rows as result
+* copy - input rows as result; can be in different order
 * map - must be called with `xargs`
-* destroy - input rows get discarded; new rows as result
-* copy - input rows as result
+
+There are two oddities here.
+The operation `destroy` is defined but no `create`.
+And the `map` does not fit in.
+It defines how a core-util must be called in the data pipeline while all the other terms describe what they do on the input data.
 
 The definitions of the node types:
 
@@ -127,7 +133,25 @@ The definitions of the node types:
 * sink - does not write output (no __\|__ to the right)
 * step - reads input and writes output
 
-The complete result of the categorization is wrapped up in this [file]({{ site.github.url }}/files/core-utils.txt).
+The complete result of the manual categorization is wrapped up in this [file]({{ site.github.url }}/files/core-utils.txt).
+
+All the core-utils are looked at as if they were developed to be used in a data processing pipeline.
+The existence of shell-scripts and the command-line is ignored.
+
+As an example the core-util `sleep` would be oddly used as follows:
+
+{% highlight bash %}
+echo 2 8 | xargs sleep
+{% endhighlight %}
+
+And of course the most common idiom becomes cluttered.
+
+{% highlight bash %}
+echo 2 | xargs sleep
+# instead of simply "sleep 2"
+{% endhighlight %}
+
+But again for the purpose of this categorization it is fine.
 
 
 ### Learned so far
