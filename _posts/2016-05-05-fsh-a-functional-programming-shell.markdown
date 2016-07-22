@@ -34,7 +34,7 @@ Out[1]: 17
 The similarities between the previous (`zsh` and core-utils) and the current tool (`jupyter`) are obvious.
 
 * The work is interactive and often different tools are combined in several iterations until a satisfactory result is found.
-* The processing model in both cases can be shortly described as "applying multiple functions consecutively on (a stream of) data".
+* The processing model in both cases can be shortly described as "applying multiple functions consecutively on (a stream of) data" (piplines, function chains).
 
 {% highlight python %}
 function_f | function_g
