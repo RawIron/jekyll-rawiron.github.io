@@ -21,3 +21,5 @@ github_username:  rawiron
 
 # Build settings
 markdown: kramdown
+
+gems: [jekyll-vimeo]
