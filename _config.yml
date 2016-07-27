@@ -9,9 +9,7 @@
 title: Less than Eight Minutes
 email: eight-minutes@rawiron.io
 description: > # this means to ignore newlines until "baseurl:"
-  How I explain it to myself in a concise way.
-  Computer systems and infrastructure.
-  Programming languages.
+  Computer infrastructure.
   Programming.
   Data Processing, Machine Learning.
 baseurl: "" # the subpath of your site, e.g. /blog
