@@ -10,8 +10,8 @@ title: Less than Eight Minutes
 email: eight-minutes@rawiron.io
 description: > # this means to ignore newlines until "baseurl:"
   Computer infrastructure.
+  Data Processing.
   Programming.
-  Data Processing, Machine Learning.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://rawiron.io" # the base hostname & protocol for your site
 twitter_username: rawiron
@@ -21,3 +21,4 @@ github_username:  rawiron
 markdown: kramdown
 
 gems: [jekyll-vimeo]
+theme: jekyll-theme-hacker
