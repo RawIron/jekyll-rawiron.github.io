@@ -111,6 +111,47 @@ letters_digits_delimiter.findall("__abc__123__d")
 
 The regex algorithm finds the first or all non-overlapping matches.
 
+{% highlight python linenos %}
+only_a = re.compile(r'aa')
+pf_matches( only_a.finditer("aaaa") )
+
+aaaa
+aa
+aaaa
+  aa
+{% endhighlight %}
+
+On *line 5* and *line 7* are the two non-overlapping matches.
+
+
+### The programming challenge
+
+Find all overlapping and non-overlapping matches of a sequence within a string.
+For example find the sequence **ababab** within **ababababab**.
+
+{% highlight raw linenos %}
+ababababab
+ababab
+  ababab
+    ababab
+{% endhighlight %}
+
+The overlapping matches are on *line 2-4*.
+
+Overlapping can only occur when the sequence repeats its start at the end.
+A simple example is the sequence **aa**.
+
+When there is a fixed way the sequence can overlap with itself things are easier.
+This kind of overlap is best matched with *positive lookbehind assertion*.
+The sequence **--catchme--**
+
+{% highlight python linenos %}
+pattern = re.compile(r'(?<=--)(catchme)--')
+pattern.findall("--catchme--catchme---catchme--__catchme--")
+
+['catchme', 'catchme', 'catchme']
+{% endhighlight %}
+
 
 ## Appendix
 
