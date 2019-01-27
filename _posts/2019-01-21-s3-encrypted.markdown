@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Store client-side encrypted data in the cloud"
+title:  "Store client-side encrypted data in the cloud using rclone and encfs"
 date:   2019-01-21 14:39:12 +0200
 categories: devops s3
 ---
@@ -13,37 +13,68 @@ The clear text of the data is only known to the client.
 
 The cloud storage provider cannot read it and the data is safe.
 
-## Setup
+The tools to build this:
 
-First pick the tools to build it.
-
-* [rclone][rclone-home]
-* encfs
 * awscli
+* encfs
+* [rclone][rclone-home]
 
-### Install Tools
 
-{% highlight bash %}
-sudo apt install rclone
-sudo apt install encfs
-pip install awscli --upgrade
-{% endhighlight %}
-
+## Setup
 
 ### S3
 
-[Here][s3-create-bucket] is nice step-by-step instruction for creating a bucket.
+{% highlight bash %}
+sudo apt install awscli
+{% endhighlight %}
+
+[Here][s3-create-bucket] is a nice step-by-step instruction for creating a bucket from the command-line.
 
 * create a S3 bucket
 * create a role with read and write access to this bucket
 * generate the access key pair for this role
 
+Save this to a file named _iam-s3-storage.json_
+{% highlight json %}
+{
+    "Version": "2019-01-27",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:Put*",
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::storage-<unique-id>/*"
+            ]
+        }
+    ]
+}
+{% endhighlight %}
+
 {% highlight bash %}
+# use key pair with rights to
+#  create a bucket in S3
+#  create user, policy and access key pair in IAM
 aws configure
-aws s3api create-bucket --bucket cloud-storage --region ca-central-1
+
+# make the bucket name pretty and unique
+aws s3api create-bucket --bucket storage-<unique-id> --region ca-central-1 --acl private
+
+aws iam create-user --user-name s3-storage
+aws_s3_policy_arn=$(aws iam create-policy --policy-name s3-storage-rw --policy-document file://iam-s3-storage.json)
+
+aws iam attach-user-policy --usr-name s3-storage --policy-arn ${aws_s3_policy_arn}
+aws iam create-access-key --user-name s3-storage
 {% endhighlight %}
 
 ### rclone
+
+{% highlight bash %}
+sudo apt install rclone
+{% endhighlight %}
 
 Create a config file like the one below in _~/.config/rclone/rclone.conf_.
 
@@ -62,6 +93,10 @@ storage_class =
 {% endhighlight %}
 
 ### encfs
+
+{% highlight bash %}
+sudo apt install encfs
+{% endhighlight %}
 
 [This][encfs-step-by-step] is a short and good how-to for _encfs_.
 A long key (password) for the encryption is a good idea.
