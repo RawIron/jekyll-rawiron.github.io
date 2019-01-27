@@ -34,8 +34,10 @@ sudo apt install awscli
 * create a role with read and write access to this bucket
 * generate the access key pair for this role
 
-Save this to a file named _iam-s3-storage.json_
-{% highlight json %}
+Save the iam policy to a file named _iam-s3-storage.json_
+{% highlight bash %}
+{% raw %}
+cat <<IAM_POLICY >iam-s3-storage.json 
 {
     "Version": "2019-01-27",
     "Statement": [
@@ -47,11 +49,13 @@ Save this to a file named _iam-s3-storage.json_
                 "s3:List*"
             ],
             "Resource": [
-                "arn:aws:s3:::storage-<unique-id>/*"
+                "arn:aws:s3:::private-data-storage-<unique-id>/*"
             ]
         }
     ]
 }
+IAM_POLICY
+{% endraw %}
 {% endhighlight %}
 
 {% highlight bash %}
@@ -61,7 +65,7 @@ Save this to a file named _iam-s3-storage.json_
 aws configure
 
 # make the bucket name pretty and unique
-aws s3api create-bucket --bucket storage-<unique-id> --region ca-central-1 --acl private
+aws s3api create-bucket --bucket private-data-storage-<unique-id> --region ca-central-1 --acl private
 
 aws iam create-user --user-name s3-storage
 aws_s3_policy_arn=$(aws iam create-policy --policy-name s3-storage-rw --policy-document file://iam-s3-storage.json)
@@ -132,7 +136,6 @@ When the encrypted data is needed, mount _encfs_.
 encfs ~/cloud-encrypted ~/cloud-storage
 {% endhighlight %}
 
-
 Manage the data as usual in the _~/cloud-storage_ directory.
 
 
@@ -140,23 +143,21 @@ Manage the data as usual in the _~/cloud-storage_ directory.
 
 _rclone_ is the tool to transfer the data between the client and the cloud storage.
 
-### Setup
-
 ### Transfer Data
 
 Copy the encrypted data to the cloud.
-Use md5 hashes for file comparison.
 
 {% highlight bash %}
-rclone copy ~/cloud-encrypted storage:private-data
+rclone copy ~/cloud-encrypted s3-ca:private-data-storage-<unique-id>
 {% endhighlight %}
 
 Restore the encrypted data from the cloud.
 
 {% highlight bash %}
-rclone copy storage:private-data ~/cloud-encrypted
+rclone copy s3-ca:private-data-storage-<unique-id> ~/cloud-encrypted
 {% endhighlight %}
 
+Use md5 hashes for file comparison.
 
 [s3-create-bucket]: http://notes.webutvikling.org/add-s3-bucket-using-awscli-example/
 [rclone-home]: https://rclone.org/
