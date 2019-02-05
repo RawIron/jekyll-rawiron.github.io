@@ -25,7 +25,7 @@ The tools to build this:
 ### S3
 
 {% highlight bash %}
-sudo apt install awscli
+sudo apt install awscli jq
 {% endhighlight %}
 
 [Here][s3-create-bucket] is a nice step-by-step instruction for creating a bucket from the command-line.
@@ -39,20 +39,22 @@ Save the iam policy to a file named _iam-s3-storage.json_
 {% raw %}
 cat <<IAM_POLICY >iam-s3-storage.json 
 {
-    "Version": "2019-01-27",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:Put*",
-                "s3:Get*",
-                "s3:List*"
-            ],
-            "Resource": [
-                "arn:aws:s3:::private-data-storage-<unique-id>/*"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:PutObjectAcl"],
+      "Resource": [
+        "arn:aws:s3:::private-data-storage-9e9ace/*",
+        "arn:aws:s3:::private-data-storage-9e9ace"
+      ]
+    }
+  ]
 }
 IAM_POLICY
 {% endraw %}
@@ -65,12 +67,21 @@ IAM_POLICY
 aws configure
 
 # make the bucket name pretty and unique
-aws s3api create-bucket --bucket private-data-storage-<unique-id> --region ca-central-1 --acl private
+aws s3api create-bucket --bucket private-data-storage-9e9ace --region ca-central-1 --acl private --create-bucket-configuration LocationConstraint=ca-central-1
 
+# manage access to the bucket
+# create a user
 aws iam create-user --user-name s3-storage
-aws_s3_policy_arn=$(aws iam create-policy --policy-name s3-storage-rw --policy-document file://iam-s3-storage.json)
 
-aws iam attach-user-policy --usr-name s3-storage --policy-arn ${aws_s3_policy_arn}
+# policy with read, write, list privileges
+aws_s3_policy_arn=$(aws iam create-policy --policy-name s3-storage-rw --policy-document file://iam-s3-storage.json | jq '.Policy.Arn' | sed 's/"//g')
+
+# give the user access
+aws iam attach-user-policy --user-name s3-storage --policy-arn ${aws_s3_policy_arn}
+# alternatively give a group access
+# and assign user to the group
+
+# create and get the access key pair
 aws iam create-access-key --user-name s3-storage
 {% endhighlight %}
 
@@ -83,6 +94,9 @@ sudo apt install rclone
 Create a config file like the one below in _~/.config/rclone/rclone.conf_.
 
 {% highlight bash %}
+{% raw %}
+mkdir -p ~/.config/rclone
+cat <<RCLONE_CONF >>~/.config/rclone/rclone.conf
 [s3-ca]
 type = s3
 env_auth = false
@@ -94,6 +108,8 @@ location_constraint = ca-central-1
 acl = private
 server_side_encryption = 
 storage_class = 
+RCLONE_CONF
+{% endraw %}
 {% endhighlight %}
 
 ### encfs
@@ -148,16 +164,15 @@ _rclone_ is the tool to transfer the data between the client and the cloud stora
 Copy the encrypted data to the cloud.
 
 {% highlight bash %}
-rclone copy ~/cloud-encrypted s3-ca:private-data-storage-<unique-id>
+rclone copy ~/cloud-encrypted s3-ca:private-data-storage-9e9ace
 {% endhighlight %}
 
 Restore the encrypted data from the cloud.
 
 {% highlight bash %}
-rclone copy s3-ca:private-data-storage-<unique-id> ~/cloud-encrypted
+rclone copy s3-ca:private-data-storage-9e9ace ~/cloud-encrypted
 {% endhighlight %}
 
-Use md5 hashes for file comparison.
 
 [s3-create-bucket]: http://notes.webutvikling.org/add-s3-bucket-using-awscli-example/
 [rclone-home]: https://rclone.org/
