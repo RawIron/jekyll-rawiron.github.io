@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Store client-side encrypted data in the cloud using rclone and encfs"
+title:  "encfs, rclone - Store client-side encrypted data in the cloud"
 date:   2019-01-21 14:39:12 +0200
 categories: devops s3
 ---
