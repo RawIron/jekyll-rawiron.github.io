@@ -1,0 +1,237 @@
+---
+layout: post
+title:  "ecryptfs, rclone - Store client-side encrypted data in the cloud"
+date:   2019-02-02 14:39:12 +0200
+categories: devops s3
+---
+
+This is the second post on how to encrypt data on the client and then sync the data to cloud storage.
+The [first part][part1] uses _rclone_, _awscli_ and _encfs_.
+
+In this part the tools are:
+
+* terraform
+* ecryptfs
+* [rclone][rclone-home]
+
+
+## Setup
+
+### S3
+
+Install _terraform_ and add the path to the executable to the _PATH_ variable.
+
+{% highlight bash %}
+sudo apt install zip
+
+wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
+unzip terraform_0.11.11_linux_amd64.zip
+
+export PATH="${PATH}:$(pwd)"
+{% endhighlight %}
+
+The following steps are done with _terraform_ and not with _awscli_.
+
+* create a S3 bucket
+* create a role with read and write access to this bucket
+* generate the access key pair for this role
+
+Copy the HCL-script into a file called _storage.tf_.
+
+{% highlight bash %}
+{% raw %}
+provider "aws" {
+  access_key = "<ACCESS_KEY_HERE>"
+  secret_key = "<SECRET_KEY_HERE>"
+  region     = "ca-central-1"
+}
+
+resource "aws_s3_bucket" "private-storage" {
+  bucket = "private-data-storage-9e9ace"
+  acl    = "private"
+  region = "ca-central-1"
+}
+
+resource "aws_iam_user" "private-storage" {
+  name = "s3-storage"
+  path = "/home/"
+}
+
+resource "aws_iam_user_policy" "private-storage" {
+  name = "s3-storage-rw"
+  user = "${aws_iam_user.private-storage.name}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:PutObjectAcl"],
+      "Resource": [
+        "arn:aws:s3:::private-data-storage-9e9ace/*",
+        "arn:aws:s3:::private-data-storage-9e9ace"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_access_key" "private-storage" {
+  user = "${aws_iam_user.private-storage.name}"
+}
+
+output "secret" {
+  value = ["${aws_iam_access_key.private-storage.id}", "${aws_iam_access_key.private-storage.secret}"]
+}
+{% endraw %}
+{% endhighlight %}
+
+Use _terraform_ to create the cloud resources used in this post.
+
+{% highlight bash %}
+terraform init
+terraform apply
+{% endhighlight %}
+
+
+### rclone
+
+{% highlight bash %}
+sudo apt install rclone
+{% endhighlight %}
+
+Create a config file like the one below in _~/.config/rclone/rclone.conf_.
+
+{% highlight bash %}
+{% raw %}
+mkdir -p ~/.config/rclone
+cat <<RCLONE_CONF >>~/.config/rclone/rclone.conf
+[s3-ca]
+type = s3
+env_auth = false
+access_key_id = <replace-me-with-your-access-key>
+secret_access_key = <replace-me-with-your-secret-key>
+region = ca-central-1
+endpoint = 
+location_constraint = ca-central-1
+acl = private
+server_side_encryption = 
+storage_class = 
+RCLONE_CONF
+{% endraw %}
+{% endhighlight %}
+
+### ecryptfs
+
+{% highlight bash %}
+sudo apt install -y ecryptfs-utils
+{% endhighlight %}
+
+[This][ecryptfs-step-by-step] is a short and good how-to for _ecryptfs_.
+A long key (password) for the encryption is a good idea.
+Any password safe is the best place to keep the key.
+
+{% highlight bash %}
+mkdir ~/cloud-encrypted
+
+sudo mount -t ecryptfs ~/cloud-encrypted ~/cloud-encrypted
+{% raw %}
+Passphrase: 
+Select cipher: 
+ 1) aes: blocksize = 16; min keysize = 16; max keysize = 32
+ 2) blowfish: blocksize = 8; min keysize = 16; max keysize = 56
+ 3) des3_ede: blocksize = 8; min keysize = 24; max keysize = 24
+ 4) twofish: blocksize = 16; min keysize = 16; max keysize = 32
+ 5) cast6: blocksize = 16; min keysize = 16; max keysize = 32
+ 6) cast5: blocksize = 8; min keysize = 5; max keysize = 16
+Selection [aes]: 
+Select key bytes: 
+ 1) 16
+ 2) 32
+ 3) 24
+Selection [16]: 
+Enable plaintext passthrough (y/n) [n]: 
+Enable filename encryption (y/n) [n]: y
+Filename Encryption Key (FNEK) Signature [13e8b1bc6090e91d]: 
+Attempting to mount with the following options:
+  ecryptfs_unlink_sigs
+  ecryptfs_fnek_sig=13e8b1bc6090e91d
+  ecryptfs_key_bytes=16
+  ecryptfs_cipher=aes
+  ecryptfs_sig=13e8b1bc6090e91d
+WARNING: Based on the contents of [/root/.ecryptfs/sig-cache.txt],
+it looks like you have never mounted with this key 
+before. This could mean that you have typed your 
+passphrase wrong.
+
+Would you like to proceed with the mount (yes/no)? : yes
+Would you like to append sig [13e8b1bc6090e91d] to
+[/root/.ecryptfs/sig-cache.txt] 
+in order to avoid this warning in the future (yes/no)? : no
+Not adding sig to user sig cache file; continuing with mount.
+Mounted eCryptfs
+{% endraw %}
+{% endhighlight %}
+
+The mount is ready to use.
+
+{% highlight bash %}
+findmnt
+{% endhighlight %}
+
+
+## Encrypt, Decrypt and Access the data
+
+The encrypted data can be viewed in clear-text when the _ecryptfs_ filesystem is mounted.
+To hide the data simply unmount the _ecryptfs_ filesystem.
+
+{% highlight bash %}
+sudo umount ~/cloud-encrypted
+{% endhighlight %}
+
+When the encrypted data is needed, mount _ecryptfs_.
+
+{% highlight bash %}
+sudo mount -t ecryptfs ~/cloud-encrypted ~/cloud-encrypted
+{% endhighlight %}
+
+Manage the data as usual in the _~/cloud-encrypted_ directory.
+
+
+## Sync the data to and from S3
+
+_rclone_ is the tool to transfer the data between the client and the cloud storage.
+
+### Transfer Data
+
+Copy the encrypted data to the cloud.
+
+{% highlight bash %}
+rclone copy ~/cloud-encrypted s3-ca:private-data-storage-9e9ace
+{% endhighlight %}
+
+Restore the encrypted data from the cloud.
+
+{% highlight bash %}
+rclone copy s3-ca:private-data-storage-9e9ace ~/cloud-encrypted
+{% endhighlight %}
+
+
+## Cleanup
+
+{% highlight bash %}
+terraform destroy
+{% endhighlight %}
+
+
+[part1]: https://rawiron.github.io/devops/s3/2019/01/21/s3-encrypted.html
+[ecryptfs-step-by-step]: https://www.howtoforge.com/tutorial/how-to-encrypt-directories-with-ecryptfs-on-ubuntu-16-04/
+[ecryptfs-tutorial]: https://wiki.archlinux.org/index.php/ECryptfs
+[rclone-home]: https://rclone.org/
